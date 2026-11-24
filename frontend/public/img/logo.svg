@@ -21,6 +21,6 @@
 
   <!-- Pure Text-Only Logo -->
   <text x="2" y="30">
-    <tspan class="text-connect">Connect</tspan><tspan class="text-x">X</tspan>
+    <tspan class="text-connect">connect</tspan><tspan class="text-x">X</tspan>
   </text>
 </svg>
