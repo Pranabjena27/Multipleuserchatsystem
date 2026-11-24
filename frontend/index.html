@@ -138,6 +138,7 @@
   </footer>
 
   <script>
+    window.CONNECTX_BACKEND_URL = 'https://connectx-backend-production-a816f9aa.up.railway.app';
     const DEFAULT_BACKEND = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
       ? 'http://127.0.0.1:5000' 
       : (window.CONNECTX_BACKEND_URL || window.location.origin);

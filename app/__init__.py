@@ -99,6 +99,13 @@ def create_app(config_name: str | None = None) -> Flask:
     # Explicitly exempt api_bp from CSRF for asynchronous JSON fetch compatibility
     csrf.exempt(api_bp)
 
+    @flask_app.after_request
+    def apply_cors_headers(response):
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,OPTIONS"
+        return response
+
     # Register SocketIO Event Handlers
     from app.sockets import events as socket_events  # noqa: F401
 
