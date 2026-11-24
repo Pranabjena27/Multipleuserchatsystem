@@ -1,2 +1,0 @@
-ConnectX Academic Project
-Line 2: File Handling Demo.
