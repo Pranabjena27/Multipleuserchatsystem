@@ -1,8 +1,14 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/:path*",
-      "destination": "https://connectx-server-production.up.railway.app/:path*"
+      "source": "/health",
+      "destination": "https://connectx-server-production.up.railway.app/health"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://connectx-server-production.up.railway.app/api/$1"
     }
   ]
 }
