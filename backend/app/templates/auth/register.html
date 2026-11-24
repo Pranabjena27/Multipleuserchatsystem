@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - ConnectX Real-Time Chat{% endblock %}
+
+{% block content %}
+<div class="auth-page-container">
+  <div class="auth-card" style="max-width:520px;">
+    <div class="auth-card-header">
+      <a href="{{ url_for('auth.login') }}" style="text-decoration:none; margin-bottom:1.25rem;">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="ConnectX Logo" style="height:46px;" />
+      </a>
+      <h2 class="auth-title">Create ConnectX Account</h2>
+      <p class="auth-subtitle">Join the real-time ConnectX communication platform</p>
+    </div>
+
+    <div class="auth-card-body">
+      <form method="POST" action="{{ url_for('auth.register') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">{{ form.username.label }}</label>
+            <div class="input-with-icon">
+              <i class="fas fa-at input-leading-icon"></i>
+              {{ form.username(class="form-input with-leading-icon", autofocus=true) }}
+            </div>
+            {% for error in form.username.errors %}
+              <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ form.full_name.label }}</label>
+            <div class="input-with-icon">
+              <i class="fas fa-id-card input-leading-icon"></i>
+              {{ form.full_name(class="form-input with-leading-icon") }}
+            </div>
+            {% for error in form.full_name.errors %}
+              <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{{ form.email.label }}</label>
+          <div class="input-with-icon">
+            <i class="fas fa-envelope input-leading-icon"></i>
+            {{ form.email(class="form-input with-leading-icon") }}
+          </div>
+          {% for error in form.email.errors %}
+            <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">{{ form.password.label }}</label>
+            <div class="input-with-icon">
+              <i class="fas fa-lock input-leading-icon"></i>
+              {{ form.password(class="form-input with-leading-icon", id="reg_password", oninput="checkPasswordStrength(this.value)") }}
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg_password')">
+                <i class="far fa-eye"></i>
+              </button>
+            </div>
+            {% for error in form.password.errors %}
+              <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ form.confirm_password.label }}</label>
+            <div class="input-with-icon">
+              <i class="fas fa-shield-halved input-leading-icon"></i>
+              {{ form.confirm_password(class="form-input with-leading-icon", id="reg_confirm") }}
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg_confirm')">
+                <i class="far fa-eye"></i>
+              </button>
+            </div>
+            {% for error in form.confirm_password.errors %}
+              <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Password Strength Meter -->
+        <div id="password-strength-container" style="display:none; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+            <span style="color:var(--text-muted);">Password Strength:</span>
+            <span id="strength-label" style="font-weight:700;">Weak</span>
+          </div>
+          <div class="strength-bar-track">
+            <div id="strength-bar-fill" class="strength-bar-fill"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="padding:0.75rem; font-size:1rem; margin-top:0.5rem;">
+          <i class="fas fa-user-check"></i> Register Account
+        </button>
+      </form>
+    </div>
+
+    <div class="auth-card-footer">
+      <span style="color:var(--text-muted);">Already registered?</span>
+      <a href="{{ url_for('auth.login') }}" style="font-weight:700;">Sign In</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === "password";
+    input.type = isPass ? "text" : "password";
+    const btnIcon = input.parentElement.querySelector(".password-toggle-btn i");
+    if (btnIcon) {
+      btnIcon.className = isPass ? "far fa-eye-slash" : "far fa-eye";
+    }
+  }
+
+  function checkPasswordStrength(val) {
+    const meter = document.getElementById("password-strength-container");
+    const fill = document.getElementById("strength-bar-fill");
+    const label = document.getElementById("strength-label");
+    if (!val) {
+      meter.style.display = "none";
+      return;
+    }
+    meter.style.display = "block";
+    let score = 0;
+    if (val.length >= 6) score += 25;
+    if (val.length >= 10) score += 25;
+    if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+    if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score += 25;
+
+    fill.style.width = score + "%";
+    if (score <= 25) {
+      fill.style.background = "var(--danger)";
+      label.textContent = "Weak";
+      label.style.color = "var(--danger)";
+    } else if (score <= 50) {
+      fill.style.background = "var(--warning)";
+      label.textContent = "Medium";
+      label.style.color = "var(--warning)";
+    } else if (score <= 75) {
+      fill.style.background = "var(--info)";
+      label.textContent = "Good";
+      label.style.color = "var(--info)";
+    } else {
+      fill.style.background = "var(--success)";
+      label.textContent = "Strong";
+      label.style.color = "var(--success)";
+    }
+  }
+</script>
+{% endblock %}

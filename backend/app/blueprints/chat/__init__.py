@@ -1,0 +1,9 @@
+"""
+Chat Blueprint Package
+======================
+"""
+
+from app.blueprints.chat.routes import chat_bp
+
+__all__ = ["chat_bp"]
+

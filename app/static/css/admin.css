@@ -1,0 +1,244 @@
+/* ==========================================================================
+   ConnectX Admin Dashboard & Analytics Stylesheet
+   Modern, Professional SaaS Analytics & Management Styling
+   ========================================================================== */
+
+.admin-container {
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 1.75rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+/* Stat Metric Cards */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.35rem;
+  margin-bottom: 2.25rem;
+}
+
+.metric-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.metric-icon {
+  font-size: 1.25rem;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xs);
+}
+
+.metric-icon.blue { background-color: #E0F2FE; color: #0369A1; }
+.metric-icon.green { background-color: #D1FAE5; color: #047857; }
+.metric-icon.purple { background-color: #EDE9FE; color: #6D28D9; }
+.metric-icon.red { background-color: #FEE2E2; color: #B91C1C; }
+.metric-icon.yellow { background-color: #FEF3C7; color: #B45309; }
+
+[data-theme="dark"] .metric-icon.blue { background: rgba(29, 78, 216, 0.25); color: #60A5FA; }
+[data-theme="dark"] .metric-icon.green { background: rgba(4, 120, 87, 0.25); color: #34D399; }
+[data-theme="dark"] .metric-icon.purple { background: rgba(109, 40, 217, 0.25); color: #A78BFA; }
+[data-theme="dark"] .metric-icon.red { background: rgba(185, 28, 28, 0.25); color: #F87171; }
+[data-theme="dark"] .metric-icon.yellow { background: rgba(180, 83, 9, 0.25); color: #FBBF24; }
+
+/* Dashboard Tables */
+.table-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.table-header {
+  padding: 1.15rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.admin-table th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 700;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.6px;
+}
+
+.admin-table td {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.admin-table tr:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Status Badges */
+.badge-status {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-active { background-color: var(--success-light); color: var(--success); }
+.badge-banned { background-color: var(--danger-light); color: var(--danger); }
+.badge-pending { background-color: var(--warning-light); color: var(--warning); }
+.badge-resolved { background-color: var(--success-light); color: var(--success); }
+
+/* Analytics Lab Grid */
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.lab-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lab-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.lab-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lab-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 1.15rem;
+  line-height: 1.5;
+}
+
+.lab-result-box {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  margin-top: 0.85rem;
+  font-family: var(--font-code);
+  font-size: 0.82rem;
+  min-height: 52px;
+  overflow-x: auto;
+}
+
+/* Admin Responsive Media Queries */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 560px;
+  }
+
+  .lab-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

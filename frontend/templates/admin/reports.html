@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Moderation Reports - ConnectX Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title"><i class="fas fa-flag" style="color:var(--danger);"></i> Moderation Queue &amp; Review</h1>
+      <p style="font-size:0.85rem; color:var(--text-muted);">
+        Review automated policy violations and user reports with explainable algorithmic diagnostics
+      </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Dashboard</a>
+  </div>
+
+  <div class="table-card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Reporter</th>
+          <th>Flagged Content &amp; Explanation</th>
+          <th>Sender</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th style="min-width:240px;">Admin Action &amp; Explanation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rep in reports %}
+          <tr>
+            <td>#{{ rep.id }}</td>
+            <td style="font-weight:600;">@{{ rep.reporter.username if rep.reporter else 'Unknown' }}</td>
+            <td style="max-width:320px; font-size:0.85rem;">
+              {% if rep.message %}
+                <div style="background:var(--bg-tertiary); padding:6px 10px; border-radius:var(--radius-sm); border-left:3px solid var(--danger); margin-bottom:6px;">
+                  <strong>Message:</strong> {{ rep.message.content }}
+                </div>
+              {% else %}
+                <span style="color:var(--text-muted); font-style:italic;">[Deleted message]</span>
+              {% endif %}
+
+              {% if rep.details %}
+                <div style="font-size:0.75rem; color:var(--text-secondary); background:rgba(0,0,0,0.03); padding:4px 8px; border-radius:4px; border-left:2px solid var(--primary); white-space:pre-wrap;">
+                  <i class="fas fa-info-circle" style="color:var(--primary);"></i> <strong>Diagnostic Explanation:</strong> {{ rep.details }}
+                </div>
+              {% endif %}
+            </td>
+            <td>@{{ rep.message.sender.username if rep.message and rep.message.sender else 'System' }}</td>
+            <td><span class="badge-category badge-cat-action_item">{{ rep.reason }}</span></td>
+            <td>
+              <span class="badge-status {{ 'badge-pending' if rep.status == 'pending' else 'badge-resolved' }}">
+                {{ rep.status.upper() }}
+              </span>
+            </td>
+            <td style="font-size:0.75rem; color:var(--text-muted);">{{ rep.created_at.strftime('%b %d, %H:%M') if rep.created_at else '' }}</td>
+            <td>
+              {% if rep.status == 'pending' %}
+                <form method="POST" action="{{ url_for('admin.resolve_report', report_id=rep.id) }}" style="display:flex; flex-direction:column; gap:6px;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}" />
+                  <input type="text" name="admin_note" class="form-input" style="font-size:0.78rem; padding:4px 8px;" placeholder="Admin explanation note..." />
+                  <div style="display:flex; gap:6px;">
+                    <button type="submit" name="action" value="resolved" class="btn btn-outline-danger btn-sm" onclick="this.form.delete_message.value='1';" title="Delete message and resolve">
+                      <i class="fas fa-trash"></i> Delete Msg
+                    </button>
+                    <button type="submit" name="action" value="dismissed" class="btn btn-secondary btn-sm" onclick="this.form.delete_message.value='0';" title="Dismiss report without action">
+                      Dismiss
+                    </button>
+                  </div>
+                  <input type="hidden" name="delete_message" value="1" />
+                </form>
+              {% else %}
+                <span style="font-size:0.8rem; color:var(--success);"><i class="fas fa-check"></i> Resolved</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">
+              <i class="fas fa-check-circle" style="font-size:2rem; color:var(--success); margin-bottom:0.5rem; display:block;"></i>
+              Moderation queue is clean. No pending reports!
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

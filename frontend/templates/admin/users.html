@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - ConnectX Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title"><i class="fas fa-users-gear"></i> User Management</h1>
+      <p style="font-size:0.85rem; color:var(--text-muted);">Manage credentials, assign roles, and toggle suspensions</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Dashboard</a>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <form method="GET" action="{{ url_for('admin.users_list') }}" style="display:flex; gap:8px;">
+        <input type="text" name="q" value="{{ search_q }}" class="form-input" style="padding:0.4rem 0.8rem; font-size:0.85rem; width:260px;" placeholder="Search username, name, email..." />
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Search</button>
+        {% if search_q %}
+          <a href="{{ url_for('admin.users_list') }}" class="btn btn-secondary btn-sm">Clear</a>
+        {% endif %}
+      </form>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Registered</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + u.avatar) }}" class="avatar-img" style="width:28px; height:28px;" />
+                <div>
+                  <div style="font-weight:600;">{{ u.full_name or u.username }}</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">@{{ u.username }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ u.email }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.set_user_role', user_id=u.id) }}" style="display:inline-flex; align-items:center; gap:4px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}" />
+                <select name="role" class="form-select" style="padding:2px 6px; font-size:0.75rem; width:auto;" onchange="this.form.submit()">
+                  <option value="user" {{ 'selected' if u.role == 'user' else '' }}>USER</option>
+                  <option value="moderator" {{ 'selected' if u.role == 'moderator' else '' }}>MODERATOR</option>
+                  <option value="admin" {{ 'selected' if u.role == 'admin' else '' }}>ADMIN</option>
+                </select>
+              </form>
+            </td>
+            <td>
+              <span class="badge-status {{ 'badge-banned' if u.is_banned else 'badge-active' }}">
+                {{ 'Suspended' if u.is_banned else 'Active' }}
+              </span>
+            </td>
+            <td style="font-size:0.75rem; color:var(--text-muted);">{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
+            <td>
+              {% if u.id != current_user.id %}
+                <form method="POST" action="{{ url_for('admin.toggle_ban_user', user_id=u.id) }}" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}" />
+                  <button type="submit" class="btn btn-sm {{ 'btn-primary' if u.is_banned else 'btn-outline-danger' }}">
+                    {{ 'Reactivate' if u.is_banned else 'Suspend' }}
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size:0.75rem; color:var(--text-muted);">(You)</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

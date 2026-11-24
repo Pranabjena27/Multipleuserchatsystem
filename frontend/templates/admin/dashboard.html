@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - ConnectX{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title"><i class="fas fa-shield-halved" style="color:var(--primary);"></i> Administration &amp; Moderation</h1>
+      <p style="font-size:0.85rem; color:var(--text-muted);">Overview of system users, platform activity, moderation queues, and security logs</p>
+    </div>
+    <div style="display:flex; gap:0.5rem;">
+      <a href="{{ url_for('admin.users_list') }}" class="btn btn-secondary btn-sm"><i class="fas fa-users-gear"></i> Users</a>
+      <a href="{{ url_for('admin.reports_list') }}" class="btn btn-secondary btn-sm"><i class="fas fa-flag"></i> Reports ({{ pending_reports }})</a>
+      <a href="{{ url_for('admin.announcements') }}" class="btn btn-secondary btn-sm"><i class="fas fa-bullhorn"></i> Announcements</a>
+      <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-secondary btn-sm"><i class="fas fa-file-shield"></i> Audit Logs</a>
+    </div>
+  </div>
+
+  <!-- Metric Cards Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>TOTAL USERS</span>
+        <i class="fas fa-users metric-icon blue"></i>
+      </div>
+      <div class="metric-value">{{ total_users }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">Registered accounts</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>ACTIVE CHANNELS</span>
+        <i class="fas fa-comments metric-icon purple"></i>
+      </div>
+      <div class="metric-value">{{ total_conversations }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">Direct &amp; Group conversations</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>TOTAL MESSAGES</span>
+        <i class="fas fa-paper-plane metric-icon green"></i>
+      </div>
+      <div class="metric-value">{{ total_messages }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">Real-time messages sent</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>BLOCKED SPAM</span>
+        <i class="fas fa-shield-virus metric-icon yellow"></i>
+      </div>
+      <div class="metric-value">{{ spam_messages }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">By Shannon entropy &amp; heuristics</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>SUSPENDED USERS</span>
+        <i class="fas fa-user-slash metric-icon red"></i>
+      </div>
+      <div class="metric-value">{{ banned_users }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">Banned accounts</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+    <!-- Recent Users Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Recently Registered Users</span>
+        <a href="{{ url_for('admin.users_list') }}" style="font-size:0.8rem;">View All &rarr;</a>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Registered</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in recent_users %}
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <img src="{{ url_for('static', filename='uploads/avatars/' + u.avatar) }}" class="avatar-img" style="width:26px; height:26px;" />
+                  <div>
+                    <div style="font-weight:600;">{{ u.full_name or u.username }}</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">@{{ u.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span style="font-size:0.75rem; font-weight:700; text-transform:uppercase;">{{ u.role }}</span></td>
+              <td>
+                <span class="badge-status {{ 'badge-banned' if u.is_banned else 'badge-active' }}">
+                  {{ 'Banned' if u.is_banned else 'Active' }}
+                </span>
+              </td>
+              <td style="font-size:0.75rem; color:var(--text-muted);">{{ u.created_at.strftime('%b %d, %H:%M') if u.created_at else '' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recent Audit Logs Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Recent Audit Log Activity</span>
+        <a href="{{ url_for('admin.audit_logs') }}" style="font-size:0.8rem;">View All &rarr;</a>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Initiator</th>
+            <th>Details</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+            <tr>
+              <td><span class="badge-category badge-cat-code">{{ log.action }}</span></td>
+              <td style="font-size:0.85rem;">{{ log.user.username if log.user else 'System' }}</td>
+              <td style="font-size:0.8rem; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ log.details }}</td>
+              <td style="font-size:0.75rem; color:var(--text-muted);">{{ log.created_at.strftime('%H:%M:%S') if log.created_at else '' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

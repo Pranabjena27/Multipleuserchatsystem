@@ -1,0 +1,65 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets
+.env
+.env.local
+
+# Databases & local instances
+instance/
+*.db
+*.sqlite3
+
+# Uploaded chat files (keep directory structure)
+app/static/uploads/attachments/*
+app/static/uploads/temp/*
+!app/static/uploads/avatars/default_avatar.svg
+!app/static/uploads/avatars/default_group.svg
+
+# Testing caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE & Editor folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cloud Deployment & Cache Folders
+.vercel/
+node_modules/
+*.log
+_backup_*/
+

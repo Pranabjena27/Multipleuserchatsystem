@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - ConnectX Real-Time Chat{% endblock %}
+
+{% block content %}
+<div class="auth-page-container">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <a href="{{ url_for('auth.login') }}" style="text-decoration:none; margin-bottom:1.25rem;">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="ConnectX Logo" style="height:46px;" />
+      </a>
+      <h2 class="auth-title">Welcome Back</h2>
+      <p class="auth-subtitle">Sign in to access your conversations &amp; workspace</p>
+    </div>
+
+    <div class="auth-card-body">
+      <form method="POST" action="{% if request.args.get('next') and request.args.get('next') not in ['None', 'null', ''] %}{{ url_for('auth.login', next=request.args.get('next')) }}{% else %}{{ url_for('auth.login') }}{% endif %}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+          <label class="form-label">{{ form.login_identifier.label }}</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user input-leading-icon"></i>
+            {{ form.login_identifier(class="form-input with-leading-icon", autofocus=true) }}
+          </div>
+          {% for error in form.login_identifier.errors %}
+            <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <label class="form-label" style="margin-bottom:0;">{{ form.password.label }}</label>
+            <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-lock input-leading-icon"></i>
+            {{ form.password(class="form-input with-leading-icon") }}
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('password')" title="Toggle visibility">
+              <i class="far fa-eye"></i>
+            </button>
+          </div>
+          {% for error in form.password.errors %}
+            <div class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; margin-top:0.75rem;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
+            {{ form.remember() }}
+            <span>{{ form.remember.label.text }}</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="padding:0.75rem; font-size:1rem; margin-top:0.5rem;">
+          <i class="fas fa-arrow-right-to-bracket"></i> Sign In to ConnectX
+        </button>
+      </form>
+
+      <!-- Quick Fill Demo Accounts -->
+      <div class="demo-accounts-box">
+        <div class="demo-accounts-title">
+          <i class="fas fa-users-gear"></i> Demo Test Accounts (Click to Fill):
+        </div>
+        <div class="demo-pills-row">
+          <button type="button" class="demo-pill" onclick="fillLoginForm('admin', 'Admin@123456')">
+            <span class="demo-role admin">Admin</span> admin
+          </button>
+          <button type="button" class="demo-pill" onclick="fillLoginForm('alice', 'Alice@123456')">
+            <span class="demo-role user">User</span> alice
+          </button>
+          <button type="button" class="demo-pill" onclick="fillLoginForm('bob', 'Bob@123456')">
+            <span class="demo-role user">User</span> bob
+          </button>
+          <button type="button" class="demo-pill" onclick="fillLoginForm('prof_sharma', 'Prof@123456')">
+            <span class="demo-role prof">Faculty</span> prof_sharma
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-card-footer">
+      <span style="color:var(--text-muted);">Don't have an account yet?</span>
+      <a href="{{ url_for('auth.register') }}" style="font-weight:700;">Create Account</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === "password";
+    input.type = isPass ? "text" : "password";
+    const btnIcon = input.parentElement.querySelector(".password-toggle-btn i");
+    if (btnIcon) {
+      btnIcon.className = isPass ? "far fa-eye-slash" : "far fa-eye";
+    }
+  }
+
+  function fillLoginForm(user, pass) {
+    const idInput = document.getElementById("login_identifier");
+    const passInput = document.getElementById("password");
+    if (idInput && passInput) {
+      idInput.value = user;
+      passInput.value = pass;
+      idInput.classList.add("input-highlight");
+      setTimeout(() => idInput.classList.remove("input-highlight"), 1000);
+    }
+  }
+</script>
+{% endblock %}

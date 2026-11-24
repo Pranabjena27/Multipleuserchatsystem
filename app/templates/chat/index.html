@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - ConnectX{% endblock %}
+
+{% block content %}
+<div class="chat-layout">
+
+  <!-- 1. LEFT PANE: CONVERSATION SIDEBAR -->
+  <aside class="chat-sidebar" id="chat-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <i class="fas fa-comments" style="color:var(--primary);"></i>
+        <span>Conversations</span>
+      </div>
+      <div class="sidebar-actions">
+        <button class="sidebar-icon-btn" title="New Direct Message" onclick="openModal('new-chat-modal')">
+          <i class="fas fa-user-plus"></i>
+        </button>
+        <button class="sidebar-icon-btn" title="Create Group" onclick="openModal('create-group-modal')">
+          <i class="fas fa-users-medical"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Filter Search -->
+    <div class="sidebar-search-box">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="sidebar-search-input" class="sidebar-search-input" placeholder="Search conversations..." />
+      </div>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="filter-pills">
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="direct">Direct</button>
+      <button class="filter-pill" data-filter="group">Groups</button>
+      <button class="filter-pill" data-filter="online">Online</button>
+    </div>
+
+    <!-- Online Contacts Horizontal Ribbon -->
+    <div class="online-ribbon-container" id="online-ribbon-container">
+      <div class="ribbon-label">
+        <span><i class="fas fa-circle" style="color:var(--success); font-size:0.55rem; margin-right:4px;"></i>ACTIVE CONTACTS</span>
+        <span id="ribbon-online-count" class="badge-mini">0</span>
+      </div>
+      <div class="online-contacts-scroll" id="online-contacts-list">
+        <!-- Dynamically rendered active contact avatars -->
+      </div>
+    </div>
+
+    <!-- Scrollable Conversation Channels List -->
+    <div class="conversations-scrollable" id="conversations-list">
+      {% for conv in conversations %}
+        {% set other_user = conv.get_other_participant(current_user.id) if conv.type == 'direct' else None %}
+        {% set display_title = conv.get_display_title(current_user.id) %}
+        {% set display_avatar = conv.get_display_avatar(current_user.id) %}
+        {% set is_active = (active_conversation_id == conv.id) %}
+        {% set latest_msg = conv.messages[-1] if conv.messages else None %}
+
+        <div class="conversation-item {{ 'active' if is_active else '' }}"
+             data-id="{{ conv.id }}"
+             data-type="{{ conv.type }}"
+             data-title="{{ display_title }}"
+             onclick="ChatApp.selectConversation({{ conv.id }})">
+          <div class="conv-avatar-box">
+            <img src="{{ url_for('static', filename='uploads/avatars/' + display_avatar) }}" class="conv-avatar-img" alt="Avatar" />
+            {% if other_user %}
+              <span class="status-indicator status-dot-user-{{ other_user.id }} {{ 'online' if other_user.is_online else '' }}"></span>
+            {% endif %}
+          </div>
+          <div class="conv-info">
+            <div class="conv-top-line">
+              <span class="conv-title">{{ display_title }}</span>
+              <span class="conv-time">{{ latest_msg.created_at.strftime('%I:%M %p') if latest_msg and latest_msg.created_at else '' }}</span>
+            </div>
+            <div class="conv-bottom-line">
+              <span class="conv-snippet">
+                {% if latest_msg %}
+                  {{ latest_msg.content[:35] if latest_msg.content else '[Attachment]' }}
+                {% else %}
+                  No messages yet
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted); font-size:0.85rem;">
+          <i class="fas fa-comment-slash" style="font-size:2rem; margin-bottom:0.75rem; opacity:0.6;"></i>
+          <p>No conversations yet.</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:0.75rem;" onclick="openModal('new-chat-modal')">
+            Start a Conversation
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Mini Profile Footer in Sidebar -->
+    <div class="sidebar-user-footer">
+      <div class="user-footer-avatar-wrapper">
+        <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) }}" class="user-footer-avatar" alt="Avatar" />
+        <span class="status-indicator online"></span>
+      </div>
+      <div class="user-footer-info">
+        <div class="user-footer-name">{{ current_user.full_name or current_user.username }}</div>
+        <div class="user-footer-status">{{ current_user.status_message or '@' + current_user.username }}</div>
+      </div>
+      <div class="user-footer-actions">
+        <button class="user-footer-btn" title="Quick Preferences" onclick="openModal('quick-settings-modal')">
+          <i class="fas fa-sliders"></i>
+        </button>
+        <a href="{{ url_for('auth.profile') }}" class="user-footer-btn" title="Edit Profile">
+          <i class="fas fa-user-pen"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. MIDDLE PANE: ACTIVE CHAT ROOM -->
+  <main class="chat-main">
+
+    <!-- Announcements Top Banner if present -->
+    {% if announcements %}
+      {% for ann in announcements %}
+        <div style="background:var(--primary-light); color:var(--primary); padding:6px 16px; font-size:0.8rem; border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between;">
+          <span><strong><i class="fas fa-bullhorn"></i> Announcement:</strong> {{ ann.title }} – {{ ann.content }}</span>
+          <button style="background:none; border:none; cursor:pointer; color:inherit;" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Empty State (No Chat Selected) -->
+    <div class="chat-empty-state" id="chat-empty-state" style="{{ 'display:none;' if active_conversation_id else 'display:flex;' }}">
+      <div class="empty-icon"><i class="fas fa-paper-plane"></i></div>
+      <h2 style="font-size:1.35rem; font-weight:700; color:var(--text-primary);">Your Messages</h2>
+      <p style="max-width:360px; font-size:0.9rem;">Select a channel from the left sidebar or start a new direct message or study group.</p>
+      <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+        <button class="btn btn-primary" onclick="openModal('new-chat-modal')">
+          <i class="fas fa-user-plus"></i> New Chat
+        </button>
+        <button class="btn btn-secondary" onclick="openModal('create-group-modal')">
+          <i class="fas fa-users"></i> Create Group
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Chat Room Content -->
+    <div id="chat-active-area" style="{{ 'display:flex; flex-direction:column; flex:1; height:100%;' if active_conversation_id else 'display:none; flex-direction:column; flex:1; height:100%;' }}">
+
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="header-left">
+          <button class="mobile-back-btn" id="mobile-back-btn" onclick="ChatApp.closeMobileChat()" title="Back to conversations">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="header-avatar-box">
+            <img id="chat-header-avatar" src="{{ url_for('static', filename='uploads/avatars/default_avatar.svg') }}" class="header-avatar" alt="Avatar" />
+            <span id="chat-header-status-dot" class="status-indicator"></span>
+          </div>
+          <div class="header-meta">
+            <div id="chat-header-title" class="header-title">Connecting...</div>
+            <div id="chat-header-subtitle" class="header-subtitle">Direct Message</div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="sidebar-icon-btn" id="search-chat-btn" title="Search Messages" onclick="openModal('search-messages-modal')">
+            <i class="fas fa-search"></i>
+          </button>
+          <button class="sidebar-icon-btn" id="summarize-chat-btn" title="✨ Summarize Conversation with Python NLP">
+            <i class="fas fa-sparkles" style="color:var(--accent);"></i>
+          </button>
+          <button class="sidebar-icon-btn" id="toggle-details-btn" title="View Channel Details &amp; Members">
+            <i class="fas fa-circle-info"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages History Scroll Container -->
+      <div class="chat-messages-container" id="chat-messages-container"></div>
+
+      <!-- Typing Indicator Bar -->
+      <div class="typing-bar" id="chat-typing-indicator" style="visibility:hidden;">
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span id="typing-usernames">Someone is typing</span>
+      </div>
+
+      <!-- Floating Input Bar -->
+      <footer class="chat-input-bar">
+        <!-- Reply Context Banner -->
+        <div class="input-reply-banner" id="input-reply-banner">
+          <div>
+            <i class="fas fa-reply" style="color:var(--primary); margin-right:4px;"></i>
+            <span>Replying to: </span>
+            <strong id="reply-snippet-text" style="color:var(--text-primary);"></strong>
+          </div>
+          <button style="background:none; border:none; cursor:pointer; color:var(--text-muted);" id="cancel-reply-btn">✕</button>
+        </div>
+
+        <!-- Pending File Attachments Preview -->
+        <div id="pending-attachments-preview" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+
+        <div class="input-row">
+          <input type="file" id="chat-file-input" style="display:none;" />
+          <button class="input-action-btn" id="chat-attach-btn" title="Attach file or image">
+            <i class="fas fa-paperclip"></i>
+          </button>
+
+          <!-- Emoji Picker Popover Toggle -->
+          <div class="emoji-picker-wrapper">
+            <button class="input-action-btn" id="emoji-picker-toggle-btn" title="Insert Emoji" type="button" onclick="ChatApp.toggleEmojiPicker()">
+              <i class="far fa-face-smile"></i>
+            </button>
+            <div id="emoji-picker-popover" class="emoji-picker-popover hidden">
+              <div class="emoji-popover-header">
+                <span>Select Emoji</span>
+                <button type="button" class="close-popover-btn" onclick="ChatApp.toggleEmojiPicker(false)">&times;</button>
+              </div>
+              <div class="emoji-categories-tabs">
+                <button type="button" class="emoji-tab-btn active" onclick="ChatApp.switchEmojiTab('smileys')">😀</button>
+                <button type="button" class="emoji-tab-btn" onclick="ChatApp.switchEmojiTab('gestures')">👍</button>
+                <button type="button" class="emoji-tab-btn" onclick="ChatApp.switchEmojiTab('hearts')">❤️</button>
+                <button type="button" class="emoji-tab-btn" onclick="ChatApp.switchEmojiTab('tech')">💻</button>
+                <button type="button" class="emoji-tab-btn" onclick="ChatApp.switchEmojiTab('party')">🎉</button>
+              </div>
+              <div class="emoji-grid-body" id="emoji-grid-body">
+                <!-- Injected via chat.js -->
+              </div>
+            </div>
+          </div>
+
+          <textarea id="chat-message-input" class="chat-textarea" placeholder="Type a message (Shift+Enter for newline, Enter to send)..." rows="1"></textarea>
+
+          <button class="send-msg-btn" id="chat-send-btn" title="Send Message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </footer>
+    </div>
+  </main>
+
+  <!-- 3. RIGHT PANE: DETAILS & PARTICIPANTS DRAWER -->
+  <aside class="chat-details-panel hidden" id="chat-details-panel">
+    <div class="details-header">
+      <h3 style="font-size:1rem; font-weight:700;"><i class="fas fa-circle-info"></i> Channel Details</h3>
+      <button style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);" id="close-details-btn">&times;</button>
+    </div>
+
+    <div class="details-section">
+      <div class="section-label">Conversation Name</div>
+      <div id="drawer-conv-title" style="font-weight:700; font-size:1rem; margin-bottom:0.25rem;"></div>
+      <div id="drawer-conv-desc" style="font-size:0.85rem; color:var(--text-muted);"></div>
+    </div>
+
+    <div class="details-section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+        <span class="section-label" style="margin-bottom:0;">Participants</span>
+        <button class="btn btn-secondary btn-sm" id="manage-members-btn" style="display:none;" onclick="openModal('add-member-modal')">
+          <i class="fas fa-user-plus"></i> Add
+        </button>
+      </div>
+      <div class="members-list" id="drawer-members-list"></div>
+    </div>
+
+    <div class="details-section">
+      <div class="section-label">Platform Analytics</div>
+      <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-secondary btn-sm" style="width:100%; justify-content:flex-start;">
+        <i class="fas fa-chart-line"></i> View Platform Analytics
+      </a>
+    </div>
+  </aside>
+</div>
+
+<!-- Include All Modals -->
+{% include "chat/modals.html" %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Initialize Chat Controller
+    ChatApp.init({{ current_user.id }}, {{ active_conversation_id if active_conversation_id else 'null' }});
+
+    // 1. User search for Direct Message Modal
+    const userSearchInput = document.getElementById("user-search-input");
+    const userSearchResults = document.getElementById("user-search-results");
+
+    if (userSearchInput && userSearchResults) {
+      let searchDebounce = null;
+      userSearchInput.addEventListener("input", (e) => {
+        clearTimeout(searchDebounce);
+        const q = e.target.value.trim();
+        if (q.length < 1) {
+          userSearchResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:1rem;font-size:0.85rem;">Type to search users across ConnectX</div>';
+          return;
+        }
+
+        searchDebounce = setTimeout(() => {
+          fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+              if (!data.users || data.users.length === 0) {
+                userSearchResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:1rem;font-size:0.85rem;">No users found</div>';
+                return;
+              }
+
+              userSearchResults.innerHTML = "";
+              data.users.forEach(u => {
+                const item = document.createElement("div");
+                item.className = "conversation-item";
+                item.style.padding = "8px";
+                item.style.borderRadius = "var(--radius-sm)";
+                item.innerHTML = `
+                  <div class="avatar-wrapper">
+                    <img src="/static/uploads/avatars/${u.avatar}" class="avatar-img" style="width:36px;height:36px;" />
+                    <span class="status-indicator status-dot-user-${u.id} ${u.is_online ? 'online' : ''}"></span>
+                  </div>
+                  <div style="flex:1;">
+                    <div style="font-weight:600;font-size:0.9rem;">${u.full_name}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);">@${u.username} &bull; ${u.status_message}</div>
+                  </div>
+                `;
+                item.addEventListener("click", () => {
+                  // Create or open direct conversation
+                  fetch("/api/conversations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type: "direct", recipient_id: u.id })
+                  })
+                  .then(r => r.json())
+                  .then(res => {
+                    closeModal("new-chat-modal");
+                    if (res.success) {
+                      window.location.href = `/c/${res.conversation.id}`;
+                    } else {
+                      showToast(res.message || "Failed to create chat", "danger");
+                    }
+                  });
+                });
+                userSearchResults.appendChild(item);
+              });
+            });
+        }, 300);
+      });
+    }
+
+    // 2. Candidate Member Search for Create Group Modal
+    const groupMemberSearch = document.getElementById("group-member-search-input");
+    const groupCandidateBox = document.getElementById("group-candidate-members");
+    const submitCreateGroupBtn = document.getElementById("btn-submit-create-group");
+    const selectedGroupMemberIds = new Set();
+
+    if (groupMemberSearch && groupCandidateBox) {
+      groupMemberSearch.addEventListener("input", (e) => {
+        const q = e.target.value.trim();
+        if (q.length < 1) return;
+
+        fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+          .then(r => r.json())
+          .then(data => {
+            groupCandidateBox.innerHTML = "";
+            data.users.forEach(u => {
+              const row = document.createElement("label");
+              row.style.cssText = "display:flex;align-items:center;gap:8px;padding:4px 6px;cursor:pointer;font-size:0.85rem;";
+              row.innerHTML = `
+                <input type="checkbox" value="${u.id}" ${selectedGroupMemberIds.has(u.id) ? 'checked' : ''} />
+                <span>${u.full_name} (@${u.username})</span>
+              `;
+              row.querySelector("input").addEventListener("change", (evt) => {
+                if (evt.target.checked) selectedGroupMemberIds.add(u.id);
+                else selectedGroupMemberIds.delete(u.id);
+              });
+              groupCandidateBox.appendChild(row);
+            });
+          });
+      });
+    }
+
+    if (submitCreateGroupBtn) {
+      submitCreateGroupBtn.addEventListener("click", () => {
+        const title = document.getElementById("group-title-input").value.trim();
+        const desc = document.getElementById("group-desc-input").value.trim();
+        if (!title) {
+          showToast("Please provide a group name", "warning");
+          return;
+        }
+
+        fetch("/api/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "group",
+            title: title,
+            description: desc,
+            member_ids: Array.from(selectedGroupMemberIds)
+          })
+        })
+        .then(r => r.json())
+        .then(res => {
+          closeModal("create-group-modal");
+          if (res.success) {
+            window.location.href = `/c/${res.conversation.id}`;
+          } else {
+            showToast(res.message || "Failed to create group", "danger");
+          }
+        });
+      });
+    }
+
+    // 3. Add Member to Active Group Search
+    const addMemberSearch = document.getElementById("add-member-search-input");
+    const addMemberResults = document.getElementById("add-member-results");
+
+    if (addMemberSearch && addMemberResults) {
+      addMemberSearch.addEventListener("input", (e) => {
+        const q = e.target.value.trim();
+        if (q.length < 1) return;
+
+        fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+          .then(r => r.json())
+          .then(data => {
+            addMemberResults.innerHTML = "";
+            data.users.forEach(u => {
+              const div = document.createElement("div");
+              div.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:6px;border-bottom:1px solid var(--border-color);font-size:0.85rem;";
+              div.innerHTML = `
+                <span>${u.full_name} (@${u.username})</span>
+                <button class="btn btn-primary btn-sm">Add</button>
+              `;
+              div.querySelector("button").addEventListener("click", () => {
+                fetch(`/api/conversations/${ChatApp.currentConversationId}/participants`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ user_id: u.id })
+                })
+                .then(r => r.json())
+                .then(res => {
+                  closeModal("add-member-modal");
+                  if (res.success) {
+                    showToast(`${u.username} added to group!`, "success");
+                    ChatApp.fetchMessages(ChatApp.currentConversationId);
+                  } else {
+                    showToast(res.message || "Could not add user", "danger");
+                  }
+                });
+              });
+              addMemberResults.appendChild(div);
+            });
+          });
+      });
+    }
+
+    // Filter pills (All, Direct, Groups)
+    document.querySelectorAll(".filter-pill").forEach(pill => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        const filterType = pill.dataset.filter;
+
+        document.querySelectorAll(".conversation-item").forEach(item => {
+          const type = item.dataset.type;
+          if (filterType === "all" || type === filterType) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+# CONNECTX - Requirements
+Flask==3.1.3
+Flask-SocketIO==5.7.2
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.1.0
+Flask-Login==0.6.3
+Flask-WTF==1.3.0
+Werkzeug==3.1.8
+WTForms==3.3.2
+SQLAlchemy==2.0.54
+simple-websocket==1.1.0
+python-engineio==4.15.1
+python-socketio==5.18.1
+Pillow==12.3.0
+python-dotenv==1.2.3
+gunicorn==23.0.0
+pytest==9.1.1

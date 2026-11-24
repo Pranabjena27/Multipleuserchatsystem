@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Platform Analytics &amp; Insights - ConnectX{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title"><i class="fas fa-chart-line" style="color:var(--primary);"></i> Platform Analytics &amp; Insights</h1>
+      <p style="font-size:0.85rem; color:var(--text-muted);">
+        Real-time platform communication metrics, sentiment distributions, and message activity
+      </p>
+    </div>
+    <a href="{{ url_for('chat.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back to Chat</a>
+  </div>
+
+  <!-- Real-Time Metrics Row (Features 5 & 6) -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>TOTAL MESSAGES</span>
+        <i class="fas fa-comments metric-icon blue"></i>
+      </div>
+      <div class="metric-value">{{ analytics.total_messages }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">Platform-wide volume</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>MESSAGES PER DAY</span>
+        <i class="fas fa-calendar-day metric-icon purple"></i>
+      </div>
+      <div class="metric-value">{{ analytics.avg_messages_per_day }} <span style="font-size:0.9rem; font-weight:600;">avg/day</span></div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">{{ analytics.messages_per_day|length }} active days recorded</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>ACTIVE USERS</span>
+        <i class="fas fa-users metric-icon yellow"></i>
+      </div>
+      <div class="metric-value">{{ analytics.active_users_count }}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">Distinct contributing participants</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span>SENTIMENT BALANCE</span>
+        <i class="fas fa-face-smile metric-icon green"></i>
+      </div>
+      <div class="metric-value">{{ analytics.sentiment_percentages.positive }}% <span style="font-size:0.85rem; font-weight:600; color:var(--success);">Positive</span></div>
+      <div style="font-size:0.75rem; color:var(--text-muted);">{{ analytics.sentiment_percentages.neutral }}% Neutral &bull; {{ analytics.sentiment_percentages.negative }}% Negative</div>
+    </div>
+  </div>
+
+  <!-- Smart Category Distribution (Feature 4) -->
+  <div class="table-card" style="margin-top:1.5rem; padding:1.25rem;">
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-chart-pie" style="color:var(--primary);"></i>
+      Feature 4: Smart Message Category Distribution
+    </h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+      <div style="background:var(--bg-tertiary); padding:10px; border-radius:8px; border-left:3px solid #3b82f6;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">General Discussion</div>
+        <div style="font-size:1.3rem; font-weight:800;">{{ analytics.category_distribution.general_discussion }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">{{ analytics.category_percentages.general_discussion }}% of total</div>
+      </div>
+
+      <div style="background:var(--bg-tertiary); padding:10px; border-radius:8px; border-left:3px solid #8b5cf6;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Questions</div>
+        <div style="font-size:1.3rem; font-weight:800;">{{ analytics.category_distribution.questions }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">{{ analytics.category_percentages.questions }}% of total</div>
+      </div>
+
+      <div style="background:var(--bg-tertiary); padding:10px; border-radius:8px; border-left:3px solid #10b981;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Announcements</div>
+        <div style="font-size:1.3rem; font-weight:800;">{{ analytics.category_distribution.announcements }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">{{ analytics.category_percentages.announcements }}% of total</div>
+      </div>
+
+      <div style="background:var(--bg-tertiary); padding:10px; border-radius:8px; border-left:3px solid #f59e0b;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Important Updates</div>
+        <div style="font-size:1.3rem; font-weight:800;">{{ analytics.category_distribution.important_updates }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">{{ analytics.category_percentages.important_updates }}% of total</div>
+      </div>
+
+      <div style="background:var(--bg-tertiary); padding:10px; border-radius:8px; border-left:3px solid #ef4444;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Work-Related</div>
+        <div style="font-size:1.3rem; font-weight:800;">{{ analytics.category_distribution.work_related }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">{{ analytics.category_percentages.work_related }}% of total</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Users & Most Active Groups Grid (Feature 5) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+    <!-- Active Users Leaderboard -->
+    <div class="table-card" style="padding:1.25rem;">
+      <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.75rem;">
+        <i class="fas fa-trophy" style="color:var(--warning);"></i> Active User Leaderboard
+      </h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Messages</th>
+            <th>Share</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in analytics.active_users[:5] %}
+            <tr>
+              <td style="font-weight:600;">@{{ u.username }}</td>
+              <td>{{ u.count }}</td>
+              <td>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <div style="flex:1; background:var(--bg-tertiary); height:6px; border-radius:3px; overflow:hidden;">
+                    <div style="width:{{ u.share_percentage }}%; background:var(--primary); height:100%;"></div>
+                  </div>
+                  <span style="font-size:0.75rem;">{{ u.share_percentage }}%</span>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No user activity yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Most Active Groups -->
+    <div class="table-card" style="padding:1.25rem;">
+      <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.75rem;">
+        <i class="fas fa-user-group" style="color:var(--primary);"></i> Most Active Group Conversations
+      </h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Group Name</th>
+            <th>Members</th>
+            <th>Messages</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in analytics.most_active_groups[:5] %}
+            <tr>
+              <td style="font-weight:600;">{{ g.title }}</td>
+              <td>{{ g.participant_count }}</td>
+              <td><span class="badge-status badge-active">{{ g.message_count }} msgs</span></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No group chat activity yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Daily Message Volume Trend (Feature 5) -->
+  <div class="table-card" style="margin-top:1.5rem; padding:1.25rem;">
+    <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.75rem;">
+      <i class="fas fa-chart-line" style="color:var(--success);"></i> Messages Per Day Trend
+    </h3>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      {% for date_str, count in analytics.messages_per_day.items() %}
+        <div style="background:var(--bg-tertiary); padding:8px 14px; border-radius:6px; text-align:center; min-width:90px;">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">{{ date_str }}</div>
+          <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">{{ count }}</div>
+          <div style="font-size:0.7rem; color:var(--text-secondary);">messages</div>
+        </div>
+      {% else %}
+        <span style="color:var(--text-muted); font-size:0.85rem;">No historical daily activity recorded.</span>
+      {% endfor %}
+    </div>
+  </div>
+
+
+  <!-- Top Keywords Distribution Table -->
+  <div class="table-card" style="margin-top:2rem;">
+    <div class="table-header">
+      <span class="table-title"><i class="fas fa-cloud"></i> Most Frequent Vocabulary (Excluding Stopwords)</span>
+    </div>
+    <div style="padding:1.25rem; display:flex; flex-wrap:wrap; gap:8px;">
+      {% for kw in analytics.top_keywords %}
+        <span class="badge-category badge-cat-code" style="font-size:0.85rem; padding:4px 10px;">
+          {{ kw.word }} ({{ kw.frequency }})
+        </span>
+      {% else %}
+        <span style="color:var(--text-muted); font-size:0.85rem;">No keyword frequencies calculated yet.</span>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}
