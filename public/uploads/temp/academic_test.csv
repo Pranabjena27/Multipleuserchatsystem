@@ -1,0 +1,4 @@
+user_id,username,role
+1,admin,admin
+2,alice,member
+3,bob,moderator

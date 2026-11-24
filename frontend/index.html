@@ -164,10 +164,16 @@
     function checkHealth(url) {
       const statusEl = document.getElementById('backend-ping-status');
       statusEl.textContent = 'Probing backend...';
-      fetch(`${url}/api/online-contacts`, { mode: 'cors' })
-        .then(() => {
-          statusEl.textContent = 'Connected (Railway Online)';
-          statusEl.style.color = '#059669';
+      fetch(`${url}/health`, { mode: 'cors' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.status === 'healthy') {
+            statusEl.textContent = 'Connected (Railway Online)';
+            statusEl.style.color = '#059669';
+          } else {
+            statusEl.textContent = 'Backend Online';
+            statusEl.style.color = '#059669';
+          }
         })
         .catch(() => {
           statusEl.textContent = 'Backend unreachable (check URL / CORS)';

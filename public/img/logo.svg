@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" width="160" height="40">
+  <style>
+    .text-connect {
+      fill: #002D62; /* Navy Blue in light mode */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+    }
+    .text-x {
+      fill: #0891B2; /* Cyan Accent */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 34px;
+      font-weight: 900;
+    }
+    @media (prefers-color-scheme: dark) {
+      .text-connect { fill: #F8FAFC; }
+      .text-x { fill: #22D3EE; }
+    }
+  </style>
+
+  <!-- Pure Text-Only Logo -->
+  <text x="2" y="30">
+    <tspan class="text-connect">connect</tspan><tspan class="text-x">X</tspan>
+  </text>
+</svg>
